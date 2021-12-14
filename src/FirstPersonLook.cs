@@ -16,6 +16,8 @@ public class FirstPersonLook : MonoBehaviour {
 
   public float angle = 0f;
 
+  private float deltaRotation = 0f;
+
   void Reset() {
     // Get the character from the FirstPersonMovement in parents.
     character = GetComponentInParent<FirstPersonMovement>().transform;
@@ -23,12 +25,26 @@ public class FirstPersonLook : MonoBehaviour {
 
   void Start() {
     // Lock the mouse cursor to the game screen.
+    Input.compass.enabled = true;
     Cursor.lockState = CursorLockMode.Locked;
-    velocity.x -= 90; /// To start facing the right direction.
   }
 
   void Update() {
+    deltaRotation =
+        (Input.compass.trueHeading / 90) * (50 /* otherwise too slow */) - 
+            180 /* degres correction for the current scene */;
     // Rotate camera using the phone's compass
-    character.localRotation = Quaternion.Euler(0, Input.compass.trueHeading * 3 - 90, 0);
+    character.localRotation =
+        Quaternion.Euler(0, character.localRotation.y + deltaRotation, 0);
+  }
+
+  void OnGUI() {
+    int halfScreenWidth = Screen.width / 2;
+    int halfScreenHeight = Screen.height / 2;
+
+    var compassRect = 
+        new Rect(halfScreenWidth - 100, halfScreenHeight - 40, 150, 50);
+    var text = "deltaRotation: " + deltaRotation;
+    GUI.Label(compassRect, text);
   }
 }
